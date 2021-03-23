@@ -12,10 +12,17 @@
   width: inherit;
   margin: 0 !important;
 }
+
 .weatherInformation {
+  
   .weather {
     font-size: 40px;
     text-align: center;
+
+    .temp{
+      float: left;
+      padding-right: 16px;
+    }
 
     i {
       font-family: weather;

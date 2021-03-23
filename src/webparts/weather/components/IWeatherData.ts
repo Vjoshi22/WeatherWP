@@ -1,6 +1,8 @@
 export interface IWeatherData {
+    alldata: any[];
     city: any;
     list: any;
+    temp:any
     coord: IWeatherLocation;
     weather: [IWeatherDescription];
     main: IWeatherCondition;
@@ -28,4 +30,8 @@ export interface IWeatherCondition {
     pressure: number;
     humidity: number;
 
+}
+export interface IWeatherDetails{
+    Location: string;
+    Temp: any;
 }

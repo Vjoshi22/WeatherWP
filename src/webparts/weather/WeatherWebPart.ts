@@ -11,11 +11,13 @@ import {
 import * as strings from 'WeatherWebPartStrings';
 import Weather from './components/Weather';
 import { IWeatherProps } from './components/IWeatherProps';
+import { PropertyFieldCollectionData, CustomCollectionFieldType } from '@pnp/spfx-property-controls/lib/PropertyFieldCollectionData';
 
 export interface IWeatherWebPartProps {
   location: string;
   unit: string;
   apikey: string;
+  collectionData: any[];
 }
 
 export default class WeatherWebPart extends BaseClientSideWebPart<IWeatherWebPartProps> {
@@ -29,6 +31,7 @@ export default class WeatherWebPart extends BaseClientSideWebPart<IWeatherWebPar
         unit: this.properties.unit,
         apikey: this.properties.apikey,
         httpClient: this.context.httpClient,
+        collectionData: this.properties.collectionData,
         configureHandler: this._onConfigure,
         errorHandler: this._onError
       }
@@ -56,10 +59,10 @@ export default class WeatherWebPart extends BaseClientSideWebPart<IWeatherWebPar
             {
               groupName: strings.DataGroupName,
               groupFields: [
-                PropertyPaneTextField('location', {
-                  label: strings.LocationFieldLabel,
-                  onGetErrorMessage: this._validateLocation.bind(this)
-                }),
+                // PropertyPaneTextField('location', {
+                //   label: strings.LocationFieldLabel,
+                //   onGetErrorMessage: this._validateLocation.bind(this)
+                // }),
                 PropertyPaneChoiceGroup('unit', {
                   label: strings.UnitFieldLabel,
                   options: [
@@ -72,6 +75,27 @@ export default class WeatherWebPart extends BaseClientSideWebPart<IWeatherWebPar
                       key: 'f'
                     }
                   ]
+                }),
+                PropertyFieldCollectionData("collectionData", {
+                  key: "collectionData",
+                  label: "Links",
+                  panelHeader: "links",
+                  manageBtnLabel: "Manage links",
+                  value: this.properties.collectionData,
+                  fields: [
+                    {
+                      id: "Location",
+                      title: "Location",
+                      type: CustomCollectionFieldType.string,
+                      required: true
+                    },
+                    {
+                      id: "Order",
+                      title: "Order",
+                      type: CustomCollectionFieldType.string
+                    }
+                  ],
+                  disabled: false
                 })
               ]
             },

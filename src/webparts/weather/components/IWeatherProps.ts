@@ -24,6 +24,7 @@ export interface IWeatherProps {
    * from a third party API
    */
   httpClient: HttpClient;
+  collectionData: any[];
   /**
    * Event handler for clicking the Configure button in the placeholder
    */

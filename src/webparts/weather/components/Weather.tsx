@@ -14,10 +14,12 @@ import {
   IWeatherProps,
   IWeatherCondition,
   IWeatherLocation,
-  IWeatherDescription
+  IWeatherDescription,
+  IWeatherDetails
 } from '.';
 import * as strings from 'WeatherWebPartStrings';
-
+var Cities = new Array();
+var weatherArray = new Array();
 
 
 
@@ -26,7 +28,10 @@ export default class Weather extends React.Component < IWeatherProps, IWeatherSt
   super();
 
   this.state = {
-    loading: false
+    loading: false,
+    citiesArr: [],
+    Location: '',
+    Temp:''
   };
 }
 
@@ -37,17 +42,23 @@ export default class Weather extends React.Component < IWeatherProps, IWeatherSt
  * @param apikey API key to authenticate the API call
  */
 private _loadWeatherInfo(location: string, unit: string, apikey: string): void {
+  weatherArray.splice(0,weatherArray.length);
+  Cities.splice(0,Cities.length);
   // notify the user that the component will load its data
   this.setState({
     loading: true
   });
-
+  let alldata: IWeatherData;
   let coord: IWeatherLocation;
   let weather: IWeatherDescription;
   let main: IWeatherCondition;
   let timezone: number;
   let name: string;
   let icon: string;
+  let temp: any;
+  let cities: IWeatherDetails;
+
+
 
   // retrieve weather information from the OpenWeatherMap weather API
   this.props.httpClient
@@ -58,18 +69,25 @@ private _loadWeatherInfo(location: string, unit: string, apikey: string): void {
     })
     .then((data: IWeatherData): void => {
       if (data) {
+        alldata = data;
         coord = data.city.coord;
-        weather =  data.list[0].main.temp;
+        temp =  data.list[0].main.temp;
         main = data.list[0].main;
         timezone = data.list[0].main.timezone;
         name = data.city.name;
         icon = data.list[0].weather[0].icon
-
-
+        
+        weatherArray.push({
+          Location: name,
+          Temp: (temp - 273.16)
+        });
+      
         this.setState({
           loading: false,
+          Location: name,
+          Temp: temp,
           coord: coord,
-          weather: weather,
+          weather: temp,
           main: main,
           timezone: timezone,
           name: name
@@ -122,18 +140,34 @@ private _loadWeatherInfo(location: string, unit: string, apikey: string): void {
 }
 
 public componentDidMount(): void {
-  if (!this.props.needsConfiguration) {
+  // weatherArray.splice(0,weatherArray.length);
+  // Cities.splice(0,Cities.length);
+  if (!this.props.needsConfiguration && this.props.collectionData ) {
     // The web part has been configured. Load the weather information
     // for the specified location.
-    this._loadWeatherInfo(this.props.location, this.props.unit, this.props.apikey);
+    //this._loadWeatherInfo(this.props.location, this.props.unit, this.props.apikey);
+    this.props.collectionData.map((val) => {  
+      // this.setState({
+      //   cityNames:val.Location
+      // })
+      
+      Cities.push({
+        Location: val.Location
+      })
+      this._loadWeatherInfo(val.Location, this.props.unit, this.props.apikey);
+    })  
   }
+  
 }
 
 public componentWillReceiveProps(nextProps: IWeatherProps): void {
   // If the location or the temperature unit have changed,
   // refresh the weather information
   if (nextProps.location && nextProps.unit) {
-    this._loadWeatherInfo(nextProps.location, nextProps.unit, nextProps.apikey);
+    // Cities.map((city) => {
+      this._loadWeatherInfo(nextProps.location, nextProps.unit, nextProps.apikey);
+    // })
+    
   }
 }
 
@@ -152,6 +186,7 @@ public render(): React.ReactElement<IWeatherProps> {
     else {
 
       // render the retrieved weather information
+      const alldata: IWeatherData = this.state.alldata;
       const weather: IWeatherDescription = this.state.weather;
       const location: IWeatherLocation = this.state.coord;
       const main: IWeatherCondition = this.state.main;
@@ -171,11 +206,16 @@ public render(): React.ReactElement<IWeatherProps> {
       }
 
       contents = (
-        <div className={styles.weather}>
-          <div className='temp'>
-            <img src={image} />
-             {Math.round(tempValue)}&deg;{tempUnit}</div>
-          <div className={styles.location}>{name}</div>
+        <div className={styles.weather + " row"}>
+          {weatherArray.map((city)=>{
+            return (
+            <div className={styles.temp + " col-4"}>
+                {/* <img src={image} /> */}
+                {Math.round(city.Temp)}&deg;{tempUnit}
+                <div className={styles.location}>{city.Location}</div>
+                </div>  
+            )
+          })}
         </div>
       );
     }
